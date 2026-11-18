@@ -1,48 +1,51 @@
-# Modelagem Matemática e Computacional: redistribuição da frota de ônibus
+# Modelagem Matemática e Computacional: Mobilidade Urbana Inteligente
 
-Trabalho da Global Solution 2026.2 (FIAP, 1º CC). O enunciado pede um modelo matemático e computacional da distribuição atual da frota de ônibus entre as regiões da cidade, uma proposta de redistribuição e a avaliação dos resultados na gestão do transporte público.
+Global Solution 2026.2 (FIAP, CitizenTech). Modelagem da frota de ônibus de um município com **sistemas lineares, matrizes e transformações lineares**, implementada em Python.
 
-**Cidade:** Belo Horizonte. **Regiões:** as 4 áreas de operação (consórcios): Pampulha, BH Leste, Dez e Dom Pedro II. **Dados:** reais, da Prefeitura de BH (BHTRANS), agosto de 2026.
+**Integrantes:** João Guilherme Figueiredo (RM 572697) e Ryan Luther Roque (RM 572993)
 
-## Resultado em uma frase
+## O que o enunciado pede e onde está
 
-Com 101 ônibus remanejados (3,5% da frota de 2.866), a diferença de carga entre as regiões cai de 27% (razão máx/mín de 1,27) para praticamente zero. Dez recebe 93 ônibus e Pampulha cede 95.
+| Pedido | Onde |
+|---|---|
+| Etapa 1: variáveis, modelo, sistema matricial, unicidade (Álgebra Linear), solução em Python, verificação | Relatório, seção 2; `modelo_frota.py`, função `etapa1` |
+| Etapa 2: necessidade por região, desequilíbrios, política, transformação linear, matriz e coeficientes, demonstrações | Relatório, seção 3; `modelo_frota.py`, função `etapa2` |
+| Código em Python | `modelo_frota.py` (e o notebook `modelo_frota.ipynb`) |
+| Relatório | `Relatorio_Modelagem_Matematica_e_Computacional.pdf` |
 
-## Como rodar
+## Resultados
+
+- Sistema 4×4: det(A) = 3, posto(A) = posto([A | b]) = 4, **solução única**: Norte 12, Sul 20, Leste 16, Oeste 24 (total 72). Os 4 registros são satisfeitos.
+- Necessidade pela demanda (passageiros / 40, arredondada para cima): 14, 19, 18 e 21 ônibus (total 72, igual à frota).
+- Hoje 160 passageiros ficam sem vaga no pico (Norte 80 e Leste 80).
+- Política: mover 4 ônibus (Oeste → Norte 2, Oeste → Leste 1, Sul → Leste 1), representada pela matriz M com colunas somando 1 e coeficientes não negativos. Isso demonstra que o total é preservado e que não há alocação negativa. Depois da política, 0 passageiros sem vaga.
+
+## Como executar
 
 ```bash
 pip install -r requirements.txt
-python scripts/preparar_dados.py     # só se tiver os dados brutos (ver abaixo)
-python modelo/modelo_frota.py        # resultado no terminal
-python scripts/gerar_notebook.py     # regenera e executa o notebook
+python modelo_frota.py              # imprime as duas etapas e gera resultados/
+python scripts/gerar_relatorio.py   # gera o PDF a partir de resultados/resultados.json
+python scripts/gerar_notebook.py    # gera e executa modelo_frota.ipynb
+python -m unittest discover -s tests
 ```
-
-O notebook pronto, com gráficos, é `modelo/modelo_frota.ipynb`.
-
-Os dados brutos (`dados/brutos/`, o MCO tem 78 MB) não vão para o GitHub. As tabelas pequenas, `dados/frota_por_regiao.csv` e `dados/demanda_por_regiao.csv`, já estão prontas e bastam para rodar o modelo.
 
 ## Estrutura
 
 ```
-Modelagem Matemática e Computacional/
-├── README.md
-├── requirements.txt
-├── dados/
-│   ├── frota_por_regiao.csv       frota cadastrada e em operação, por região
-│   ├── demanda_por_regiao.csv     passageiros, viagens e km por dia útil, por região
-│   ├── FONTES.md                  de onde vieram os dados e limitações
-│   └── brutos/                    arquivos originais baixados (fora do GitHub)
-├── scripts/
-│   ├── preparar_dados.py          dados brutos -> tabelas por região
-│   └── gerar_notebook.py          monta e executa o notebook
-├── modelo/
-│   ├── MODELO_MATEMATICO.md       variáveis, função objetivo e restrições
-│   ├── modelo_frota.py            o modelo em código (programação linear inteira)
-│   └── modelo_frota.ipynb         análise completa, com gráficos
-├── resultados/
-│   ├── comparativo_antes_depois.png
-│   ├── sensibilidade.png / sensibilidade.csv
-│   └── tabela_resultados.csv
-└── docs/
-    └── ANALISE_E_CONCLUSAO.md     interpretação, impacto e limitações
+├── modelo_frota.py                 o modelo (Etapas 1 e 2) e os gráficos
+├── modelo_frota.ipynb              o mesmo modelo, passo a passo, já executado
+├── Relatorio_Modelagem_Matematica_e_Computacional.pdf
+├── resultados/                     resultados.json e os dois gráficos
+├── scripts/                        geradores do relatório e do notebook
+├── tests/test_modelo.py            testes automatizados
+└── extensao_bhtrans_dados_reais/   extensão opcional com dados reais de BH (fora do enunciado)
 ```
+
+## Limitações
+
+Os dados do enunciado são hipotéticos e de um único horário de pico. A matriz M foi calibrada para a distribuição atual; se a frota ou a demanda mudarem, deve ser recalculada com `construir_transformacao` (as propriedades de preservar o total e não gerar valores negativos continuam valendo).
+
+## Entrega
+
+O PDF do enunciado não informa o formato de entrega no portal. Confirmar com o professor; o conjunto natural é `modelo_frota.py`, o notebook e o relatório em PDF.

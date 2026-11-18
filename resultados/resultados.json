@@ -1,0 +1,492 @@
+{
+  "etapa1": {
+    "variaveis": {
+      "N": "Norte",
+      "S": "Sul",
+      "L": "Leste",
+      "O": "Oeste"
+    },
+    "equacoes": [
+      {
+        "texto": "N + S + L + O = 72",
+        "coeficientes": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "termo_independente": 72
+      },
+      {
+        "texto": "N + 2S + O = 76",
+        "coeficientes": [
+          1,
+          2,
+          0,
+          1
+        ],
+        "termo_independente": 76
+      },
+      {
+        "texto": "S + 2L = 52",
+        "coeficientes": [
+          0,
+          1,
+          2,
+          0
+        ],
+        "termo_independente": 52
+      },
+      {
+        "texto": "N + L + 2O = 76",
+        "coeficientes": [
+          1,
+          0,
+          1,
+          2
+        ],
+        "termo_independente": 76
+      }
+    ],
+    "A": [
+      [
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        2,
+        0,
+        1
+      ],
+      [
+        0,
+        1,
+        2,
+        0
+      ],
+      [
+        1,
+        0,
+        1,
+        2
+      ]
+    ],
+    "b": [
+      72,
+      76,
+      52,
+      76
+    ],
+    "passos": [
+      {
+        "descricao": "Matriz aumentada [A | b]",
+        "matriz": [
+          [
+            "1",
+            "1",
+            "1",
+            "1",
+            "72"
+          ],
+          [
+            "1",
+            "2",
+            "0",
+            "1",
+            "76"
+          ],
+          [
+            "0",
+            "1",
+            "2",
+            "0",
+            "52"
+          ],
+          [
+            "1",
+            "0",
+            "1",
+            "2",
+            "76"
+          ]
+        ]
+      },
+      {
+        "descricao": "Coluna 1: L2 <- L2 - (1)·L1; L4 <- L4 - (1)·L1",
+        "matriz": [
+          [
+            "1",
+            "1",
+            "1",
+            "1",
+            "72"
+          ],
+          [
+            "0",
+            "1",
+            "-1",
+            "0",
+            "4"
+          ],
+          [
+            "0",
+            "1",
+            "2",
+            "0",
+            "52"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "1",
+            "4"
+          ]
+        ]
+      },
+      {
+        "descricao": "Coluna 2: L1 <- L1 - (1)·L2; L3 <- L3 - (1)·L2; L4 <- L4 - (-1)·L2",
+        "matriz": [
+          [
+            "1",
+            "0",
+            "2",
+            "1",
+            "68"
+          ],
+          [
+            "0",
+            "1",
+            "-1",
+            "0",
+            "4"
+          ],
+          [
+            "0",
+            "0",
+            "3",
+            "0",
+            "48"
+          ],
+          [
+            "0",
+            "0",
+            "-1",
+            "1",
+            "8"
+          ]
+        ]
+      },
+      {
+        "descricao": "Coluna 3: L3 <- L3 / 3; L1 <- L1 - (2)·L3; L2 <- L2 - (-1)·L3; L4 <- L4 - (-1)·L3",
+        "matriz": [
+          [
+            "1",
+            "0",
+            "0",
+            "1",
+            "36"
+          ],
+          [
+            "0",
+            "1",
+            "0",
+            "0",
+            "20"
+          ],
+          [
+            "0",
+            "0",
+            "1",
+            "0",
+            "16"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "1",
+            "24"
+          ]
+        ]
+      },
+      {
+        "descricao": "Coluna 4: L1 <- L1 - (1)·L4",
+        "matriz": [
+          [
+            "1",
+            "0",
+            "0",
+            "0",
+            "12"
+          ],
+          [
+            "0",
+            "1",
+            "0",
+            "0",
+            "20"
+          ],
+          [
+            "0",
+            "0",
+            "1",
+            "0",
+            "16"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "1",
+            "24"
+          ]
+        ]
+      }
+    ],
+    "determinante": "3",
+    "determinante_numpy": 3.0000000000000004,
+    "posto_A": 4,
+    "posto_aumentada": 4,
+    "numero_de_condicao": 15.639837471312802,
+    "solucao_unica": true,
+    "distribuicao_atual": {
+      "Norte": 12,
+      "Sul": 20,
+      "Leste": 16,
+      "Oeste": 24
+    },
+    "x": [
+      12,
+      20,
+      16,
+      24
+    ],
+    "conferencia_numpy": [
+      12.0,
+      20.0,
+      16.0,
+      24.0
+    ],
+    "verificacao": [
+      {
+        "equacao": "N + S + L + O = 72",
+        "esquerda": 72,
+        "direita": 72,
+        "ok": true
+      },
+      {
+        "equacao": "N + 2S + O = 76",
+        "esquerda": 76,
+        "direita": 76,
+        "ok": true
+      },
+      {
+        "equacao": "S + 2L = 52",
+        "esquerda": 52,
+        "direita": 52,
+        "ok": true
+      },
+      {
+        "equacao": "N + L + 2O = 76",
+        "esquerda": 76,
+        "direita": 76,
+        "ok": true
+      }
+    ],
+    "todas_equacoes_ok": true
+  },
+  "etapa2": {
+    "demanda": [
+      {
+        "regiao": "Norte",
+        "passageiros": 560,
+        "capacidade": 40,
+        "necessario": 14,
+        "atual": 12,
+        "saldo": -2
+      },
+      {
+        "regiao": "Sul",
+        "passageiros": 760,
+        "capacidade": 40,
+        "necessario": 19,
+        "atual": 20,
+        "saldo": 1
+      },
+      {
+        "regiao": "Leste",
+        "passageiros": 720,
+        "capacidade": 40,
+        "necessario": 18,
+        "atual": 16,
+        "saldo": -2
+      },
+      {
+        "regiao": "Oeste",
+        "passageiros": 840,
+        "capacidade": 40,
+        "necessario": 21,
+        "atual": 24,
+        "saldo": 3
+      }
+    ],
+    "total_necessario": 72,
+    "frota_suficiente": true,
+    "antes": {
+      "onibus": [
+        12,
+        20,
+        16,
+        24
+      ],
+      "ocupacao": [
+        1.1666666666666667,
+        0.95,
+        1.125,
+        0.875
+      ],
+      "passageiros_por_onibus": [
+        46.666666666666664,
+        38.0,
+        45.0,
+        35.0
+      ],
+      "nao_atendidos": [
+        80,
+        0,
+        80,
+        0
+      ],
+      "total_nao_atendidos": 160,
+      "ocupacao_maxima": 1.1666666666666667
+    },
+    "depois": {
+      "onibus": [
+        14,
+        19,
+        18,
+        21
+      ],
+      "ocupacao": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "passageiros_por_onibus": [
+        40.0,
+        40.0,
+        40.0,
+        40.0
+      ],
+      "nao_atendidos": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "total_nao_atendidos": 0,
+      "ocupacao_maxima": 1.0
+    },
+    "fluxos": [
+      {
+        "origem": "Oeste",
+        "destino": "Norte",
+        "onibus": 2
+      },
+      {
+        "origem": "Oeste",
+        "destino": "Leste",
+        "onibus": 1
+      },
+      {
+        "origem": "Sul",
+        "destino": "Leste",
+        "onibus": 1
+      }
+    ],
+    "onibus_movidos": 4,
+    "T": [
+      [
+        "1",
+        "0",
+        "0",
+        "1/12"
+      ],
+      [
+        "0",
+        "19/20",
+        "0",
+        "0"
+      ],
+      [
+        "0",
+        "1/20",
+        "1",
+        "1/24"
+      ],
+      [
+        "0",
+        "0",
+        "0",
+        "7/8"
+      ]
+    ],
+    "T_float": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.08333333333333333
+      ],
+      [
+        0.0,
+        0.95,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.05,
+        1.0,
+        0.041666666666666664
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.875
+      ]
+    ],
+    "novo_vetor": [
+      14,
+      19,
+      18,
+      21
+    ],
+    "novo_vetor_exato": [
+      "14",
+      "19",
+      "18",
+      "21"
+    ],
+    "soma_das_colunas": [
+      "1",
+      "1",
+      "1",
+      "1"
+    ],
+    "menor_coeficiente": "0",
+    "total_antes": 72,
+    "total_depois": 72,
+    "total_preservado": true,
+    "sem_alocacao_negativa": true,
+    "atinge_necessidade": true,
+    "determinante_T": "133/160",
+    "linearidade_ok": true
+  }
+}

@@ -1,112 +1,79 @@
-"""Gera e executa modelo/modelo_frota.ipynb (o notebook da entrega).
-
-Rode com:  python scripts/gerar_notebook.py
-"""
-
+"""Gera e executa modelo_frota.ipynb (mesmo modelo de modelo_frota.py, em formato de notebook)."""
 from pathlib import Path
 
-import nbformat
-from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
+import nbformat as nbf
 from nbconvert.preprocessors import ExecutePreprocessor
 
-RAIZ = Path(__file__).resolve().parents[1]
-DESTINO = RAIZ / "modelo" / "modelo_frota.ipynb"
+RAIZ = Path(__file__).resolve().parent.parent
+md, code = nbf.v4.new_markdown_cell, nbf.v4.new_code_cell
 
 celulas = [
-    new_markdown_cell("""# Modelagem Matemática e Computacional: redistribuição da frota de ônibus
-
-**Case:** Citizen Assist AI (GS 2026.2, FIAP). **Pergunta:** a frota de ônibus está bem distribuída entre as regiões da cidade? Se não, como redistribuir e o que se ganha?
-
-**Cidade e regiões:** Belo Horizonte, dividida em 4 áreas de operação (consórcios): Pampulha (801), BH Leste (802), Dez (803) e Dom Pedro II (804).
-
-**Dados reais:** Prefeitura de Belo Horizonte / BHTRANS, agosto de 2026 (detalhes em `dados/FONTES.md`).
-"""),
-    new_code_cell("""import sys
-from pathlib import Path
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-
-RAIZ = Path.cwd().parent if Path.cwd().name == "modelo" else Path.cwd()
-sys.path.insert(0, str(RAIZ / "modelo"))
-import modelo_frota as mf
-
-df = mf.carregar_dados()
-df[["regiao", "onibus_cadastrados", "onibus_atuais", "passageiros_dia_util", "viagens_dia_util", "km_dia_util"]]"""),
-    new_markdown_cell("""## 1. Situação atual
-
-A *carga* de uma região é a quantidade de passageiros por dia útil dividida pelo número de ônibus que operam nela. Se a carga varia muito entre regiões, alguns ônibus ficam sobrecarregados enquanto outros ficam folgados."""),
-    new_code_cell("""demanda = df["passageiros_dia_util"].to_numpy()
-atuais = df["onibus_atuais"].to_numpy()
-antes = mf.indicadores(demanda, atuais)
-pd.Series(antes, name="situação atual").round(3)"""),
-    new_markdown_cell("""## 2. O modelo
-
-**Variáveis:** $x_i$ = número de ônibus na região $i$ após a redistribuição (inteiro).
-**Dados:** $d_i$ = passageiros por dia útil, $x^0_i$ = ônibus que operam hoje, $N=\\sum x^0_i$ (a frota total não muda).
-**Alvo:** $a_i = N\\, d_i / \\sum_j d_j$ (frota proporcional à demanda).
-
-$$\\min \\sum_i |x_i - a_i| \\quad\\text{sujeito a}\\quad \\sum_i x_i = N,\\;\\; (1-f)\\,x^0_i \\le x_i \\le (1+f)\\,x^0_i,\\;\\; x_i\\in\\mathbb{Z}$$
-
-O módulo $|\\cdot|$ vira restrições lineares com variáveis auxiliares $t_i \\ge |x_i - a_i|$. A folga $f$ limita quantos ônibus cada região pode ganhar ou perder (por limites de garagem, contrato e operação). O problema é de **programação linear inteira**, resolvido com `scipy.optimize.milp`."""),
-    new_code_cell("""proposta = mf.comparar(df, folga=0.15)
-proposta"""),
-    new_code_cell("""novos = proposta["onibus_propostos"].to_numpy()
-depois = mf.indicadores(demanda, novos)
-resumo = pd.DataFrame({"antes": antes, "depois": depois}).round(3)
-resumo["mudança"] = (resumo["depois"] - resumo["antes"]).round(3)
-resumo"""),
-    new_code_cell("""fig, ax = plt.subplots(figsize=(8, 4.5))
-x = np.arange(len(proposta))
-largura = 0.38
-ax.bar(x - largura / 2, proposta["pass_por_onibus_antes"], largura, label="Antes", color="#94a3b8")
-ax.bar(x + largura / 2, proposta["pass_por_onibus_depois"], largura, label="Depois (proposta)", color="#4f46e5")
-ax.set_xticks(x, proposta["regiao"])
-ax.set_ylabel("Passageiros por ônibus por dia útil")
-ax.set_title("Carga por ônibus em cada região, antes e depois")
-ax.legend()
-for i, (a, d) in enumerate(zip(proposta["pass_por_onibus_antes"], proposta["pass_por_onibus_depois"])):
-    ax.text(i - largura / 2, a + 3, f"{a:.0f}", ha="center", fontsize=8)
-    ax.text(i + largura / 2, d + 3, f"{d:.0f}", ha="center", fontsize=8)
-fig.tight_layout()
-(RAIZ / "resultados").mkdir(exist_ok=True)
-fig.savefig(RAIZ / "resultados" / "comparativo_antes_depois.png", dpi=150)
-proposta.to_csv(RAIZ / "resultados" / "tabela_resultados.csv", index=False, encoding="utf-8")
-plt.show()"""),
-    new_markdown_cell("""## 3. Sensibilidade: quanto remanejar?
-
-Quanto maior a folga, maior o ganho de equilíbrio, mas mais ônibus mudam de região. A tabela mostra esse custo-benefício."""),
-    new_code_cell("""sens = mf.sensibilidade(df)
-sens"""),
-    new_code_cell("""fig, ax = plt.subplots(figsize=(7, 4))
-ax.plot(sens["onibus_remanejados"], sens["coef_variacao"], marker="o", color="#4f46e5")
-for _, linha in sens.iterrows():
-    ax.annotate(f"f={linha['folga']:.0%}", (linha["onibus_remanejados"], linha["coef_variacao"]),
-                textcoords="offset points", xytext=(6, 6), fontsize=8)
-ax.set_xlabel("Ônibus remanejados entre regiões")
-ax.set_ylabel("Coeficiente de variação da carga")
-ax.set_title("Custo-benefício da redistribuição")
-fig.tight_layout()
-fig.savefig(RAIZ / "resultados" / "sensibilidade.png", dpi=150)
-sens.to_csv(RAIZ / "resultados" / "sensibilidade.csv", index=False, encoding="utf-8")
-plt.show()"""),
-    new_markdown_cell("""## 4. Checagem do custo operacional
-
-Mover ônibus muda quantos quilômetros cada ônibus precisa rodar para manter o mesmo serviço. Se a proposta só empurrasse o problema para a quilometragem, ela não seria boa."""),
-    new_code_cell("""proposta[["regiao", "km_por_onibus_antes", "km_por_onibus_depois"]]"""),
-    new_code_cell("""ganho = 1 - depois["coef_variacao"] / antes["coef_variacao"]
-movidos = int(np.clip(proposta["variacao"], 0, None).sum())
-pct = movidos / atuais.sum()
-print(f"Desigualdade de carga (coef. de variação): {antes['coef_variacao']:.3f} -> {depois['coef_variacao']:.4f} ({ganho:.0%} menor)")
-print(f"Carga do ônibus mais sobrecarregado: {antes['carga_maxima']:.0f} -> {depois['carga_maxima']:.0f} passageiros/dia")
-print(f"Ônibus remanejados: {movidos} de {atuais.sum()} ({pct:.1%} da frota)")"""),
-    new_markdown_cell("""## 5. Conclusão e limitações
-
-Veja `docs/ANALISE_E_CONCLUSAO.md` para a interpretação completa. Limitações principais: o modelo trata todas as regiões e ônibus como equivalentes; usa passageiros por dia útil de um único mês; o MCO não inclui passageiros das linhas de bloqueio das estações BHBUS e MOVE; e mover ônibus entre consórcios envolve contratos e garagens, por isso a folga é um parâmetro, não uma certeza."""),
+    md("# Mobilidade Urbana Inteligente: modelagem matemática da frota\n\n"
+       "**Modelagem Matemática e Computacional · Global Solution 2026.2 (CitizenTech)**  \n"
+       "João Guilherme Figueiredo (RM 572697) · Ryan Luther Roque (RM 572993)\n\n"
+       "Os dados do enunciado são hipotéticos. Variáveis: N, S, L e O são os ônibus nos centros Norte, Sul, Leste e Oeste."),
+    code("import pandas as pd\n"
+         "from IPython.display import Image, display\n"
+         "import modelo_frota as mf\n\n"
+         "res = mf.executar()\n"
+         "e1, e2 = res['etapa1'], res['etapa2']"),
+    md("## Etapa 1: diagnóstico da situação atual\n\n### b) e c) Modelo e sistema matricial A·x = b"),
+    code("for eq in e1['equacoes']:\n    print(eq['texto'])\n"
+         "print()\n"
+         "print('A =')\n"
+         "display(pd.DataFrame(e1['A'], columns=['N', 'S', 'L', 'O']))\n"
+         "print('b =', e1['b'])"),
+    md("### d) Unicidade da solução: Gauss-Jordan com frações exatas, posto e determinante"),
+    code("for passo in e1['passos']:\n"
+         "    print(passo['descricao'])\n"
+         "    for linha in passo['matriz']:\n"
+         "        print('   ', linha)\n"
+         "    print()"),
+    code("print('posto(A)        =', e1['posto_A'])\n"
+         "print('posto([A | b])  =', e1['posto_aumentada'])\n"
+         "print('det(A)          =', e1['determinante'], '(numpy:', round(e1['determinante_numpy'], 4), ')')\n"
+         "print('solução única   =', e1['solucao_unica'])"),
+    md("### e) e f) Distribuição encontrada e verificação dos registros"),
+    code("print('Distribuição atual:', e1['distribuicao_atual'])\n"
+         "display(pd.DataFrame(e1['verificacao']))"),
+    md("## Etapa 2: política de redistribuição\n\n### a) e b) Necessidade e desequilíbrios\n\n"
+       "Necessidade da região i: n_i = teto(passageiros_i / 40)."),
+    code("display(pd.DataFrame(e2['demanda']))\n"
+         "print('Total necessário:', e2['total_necessario'], '| frota suficiente:', e2['frota_suficiente'])\n"
+         "print('Ocupação antes:', [round(o, 3) for o in e2['antes']['ocupacao']])\n"
+         "print('Passageiros sem vaga antes:', e2['antes']['nao_atendidos'])"),
+    md("### c) Política: fluxos entre regiões\n\n"
+       "Quem tem mais sobra doa primeiro; quem está mais lotado recebe primeiro; só doam as regiões com sobra e só recebem as com falta."),
+    code("display(pd.DataFrame(e2['fluxos']))\nprint('Ônibus movidos:', e2['onibus_movidos'])"),
+    md("### d) e e) Transformação linear T(x) = M·x e a matriz M\n\n"
+       "m_ij (i ≠ j) é a fração da frota da região j enviada à região i; m_jj é a fração que permanece."),
+    code("regs = ['Norte', 'Sul', 'Leste', 'Oeste']\n"
+         "M = pd.DataFrame(e2['T'], index=['destino ' + r for r in regs], columns=['origem ' + r for r in regs])\n"
+         "display(M)"),
+    md("### f) Demonstrações: total preservado e nenhuma alocação negativa\n\n"
+       "Cada coluna de M soma 1 (toda a frota de uma região fica ou é enviada) e todos os coeficientes são não negativos. "
+       "Logo Σ(Mx)_i = Σ x_j e (Mx)_i ≥ 0 para qualquer x ≥ 0."),
+    code("print('Soma de cada coluna de M :', e2['soma_das_colunas'])\n"
+         "print('Menor coeficiente de M  :', e2['menor_coeficiente'])\n"
+         "print('M·x                     :', e2['novo_vetor'], '(necessidade:', [d['necessario'] for d in e2['demanda']], ')')\n"
+         "print('Total antes -> depois   :', e2['total_antes'], '->', e2['total_depois'])\n"
+         "print('Total preservado        :', e2['total_preservado'])\n"
+         "print('Sem alocação negativa   :', e2['sem_alocacao_negativa'])\n"
+         "print('Atinge a necessidade    :', e2['atinge_necessidade'])\n"
+         "print('det(M)                  :', e2['determinante_T'])\n"
+         "print('Linearidade verificada  :', e2['linearidade_ok'])"),
+    md("## Resultado da intervenção"),
+    code("print('Passageiros sem vaga:', e2['antes']['total_nao_atendidos'], '->', e2['depois']['total_nao_atendidos'])\n"
+         "print('Ocupação máxima:', round(e2['antes']['ocupacao_maxima'], 3), '->', round(e2['depois']['ocupacao_maxima'], 3))\n"
+         "display(Image('resultados/frota_antes_depois.png'))\n"
+         "display(Image('resultados/ocupacao_antes_depois.png'))"),
+    md("**Conclusão.** A frota (72) é suficiente para a demanda do pico (72), mas está mal distribuída. "
+       "Mover 4 ônibus elimina a superlotação de Norte e Leste e a transformação proposta preserva o total e não gera valores negativos. "
+       "Limitações: dados hipotéticos, um único horário e M calibrada para a distribuição atual."),
 ]
 
-nb = new_notebook(cells=celulas)
-nb.metadata["kernelspec"] = {"display_name": "Python 3", "language": "python", "name": "python3"}
-ExecutePreprocessor(timeout=300, kernel_name="python3").preprocess(nb, {"metadata": {"path": str(DESTINO.parent)}})
-nbformat.write(nb, DESTINO)
-print("notebook salvo em", DESTINO)
+nb = nbf.v4.new_notebook(cells=celulas)
+nb.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}
+ExecutePreprocessor(timeout=300, kernel_name="python3").preprocess(nb, {"metadata": {"path": str(RAIZ)}})
+nbf.write(nb, RAIZ / "modelo_frota.ipynb")
+print("Notebook executado e salvo em", RAIZ / "modelo_frota.ipynb")

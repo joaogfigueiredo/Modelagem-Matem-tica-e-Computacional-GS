@@ -113,7 +113,9 @@ S += [
     Paragraph("Modelagem matemática para a gestão do transporte público", ParagraphStyle("st", fontName="Arial", fontSize=14, leading=18, textColor=colors.HexColor("#333333"), spaceAfter=18)),
     Paragraph("Relatório técnico · Modelagem Matemática e Computacional · Global Solution 2026.2 (CitizenTech)", celula),
     Spacer(1, 0.6 * cm),
-    Paragraph("<b>Integrantes</b><br/>João Guilherme Figueiredo · RM 572697<br/>Ryan Luther Roque · RM 572993", ParagraphStyle("i", fontName="Arial", fontSize=11, leading=16)),
+    Paragraph("<b>Equipe: Citizen Solutions Tech</b><br/><br/><b>Integrantes</b><br/>João Guilherme Figueiredo · RM 572697<br/>Ryan Luther Roque · RM 572993<br/><br/>"
+              "<b>Divisão geral do trabalho:</b> João, códigos e partes complementares; Ryan, lógica e códigos complementares",
+              ParagraphStyle("i", fontName="Arial", fontSize=11, leading=16)),
     Spacer(1, 0.8 * cm),
 ]
 S += [

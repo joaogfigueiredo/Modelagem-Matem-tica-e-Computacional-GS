@@ -48,4 +48,4 @@ Os dados do enunciado são hipotéticos e de um único horário de pico. A matri
 
 ## Entrega
 
-O PDF do enunciado não informa o formato de entrega no portal. Confirmar com o professor; o conjunto natural é `modelo_frota.py`, o notebook e o relatório em PDF.
+O professor pediu **arquivos anexados** (e não links). Enviar o relatório em PDF (`Relatorio_Modelagem_Matematica_e_Computacional.pdf`), o notebook `modelo_frota.ipynb` (que roda sozinho, já executado) e o script `modelo_frota.py`.

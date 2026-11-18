@@ -7,11 +7,17 @@ from nbconvert.preprocessors import ExecutePreprocessor
 RAIZ = Path(__file__).resolve().parent.parent
 md, code = nbf.v4.new_markdown_cell, nbf.v4.new_code_cell
 
+# O código do modelo entra no próprio notebook, para ele rodar sozinho (sem precisar do modelo_frota.py ao lado).
+FONTE_DO_MODELO = "%%writefile modelo_frota.py\n" + (RAIZ / "modelo_frota.py").read_text(encoding="utf-8").rstrip("\n")
+
 celulas = [
     md("# Mobilidade Urbana Inteligente: modelagem matemática da frota\n\n"
        "**Modelagem Matemática e Computacional · Global Solution 2026.2 (CitizenTech)**  \n"
-       "João Guilherme Figueiredo (RM 572697) · Ryan Luther Roque (RM 572993)\n\n"
-       "Os dados do enunciado são hipotéticos. Variáveis: N, S, L e O são os ônibus nos centros Norte, Sul, Leste e Oeste."),
+       "João Guilherme Figueiredo (RM 572697) · Ryan Luther Roque (RM 572993)  \n"
+       "**Equipe:** Citizen Solutions Tech · divisão geral do trabalho: João, códigos e partes complementares; Ryan, lógica e códigos complementares\n\n"
+       "Os dados do enunciado são hipotéticos. Variáveis: N, S, L e O são os ônibus nos centros Norte, Sul, Leste e Oeste.\n\n"
+       "A primeira célula de código grava o arquivo `modelo_frota.py` com todo o modelo, para este notebook rodar sozinho."),
+    code(FONTE_DO_MODELO),
     code("import pandas as pd\n"
          "from IPython.display import Image, display\n"
          "import modelo_frota as mf\n\n"
